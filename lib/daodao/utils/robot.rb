@@ -13,7 +13,7 @@ module Util
     def start()
       @stopped = false
 
-      @threads = Util.newthreads(@worker_count, self, :job)
+      @threads = Robot.newthreads(@worker_count, self, :job)
     end
 
     def stop
@@ -23,7 +23,22 @@ module Util
     def job
       #do somethinf
     end
+  end
 
+  def self.newthreads(count, obj, method_name)
+    threads = []
+
+    i = 0
+    while i < count
+      t = Thread.new do
+        obj.send(method_name)
+      end
+
+      threads << t
+      i += 1
+    end
+
+    return threads
   end
 
 end

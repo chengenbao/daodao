@@ -25,13 +25,14 @@ require 'logger'
 module DaoDao
   autoload :LogAdapter,            'daodao/log_adapter'
   autoload :VERSION,               'daodao/version'
-  autoload :Utils,                 'daodao/utils'
   autoload :Configuration,         'daodao/configuration'
   autoload :Errors,                'daodao/errors'
   autoload :HttpRequester,         'daodao/utils/http_requester'
-  autoload :City,                  'daodao/city'
-  autoload :Hotel,                 'daodao/hotel'
-  autoload :Room,                  'daodao/room'
+  autoload :City,                  'daodao/model/city'
+  autoload :Hotel,                 'daodao/model/hotel'
+  autoload :Room,                  'daodao/model/room'
+  autoload :Utility,               'daodao/utils/utility'
+  autoload :Database,              'daodao/database'
 
   # crawler and indexer
   require 'daodao/crawler'
@@ -58,8 +59,7 @@ module DaoDao
       end
 
       # Merge DEFAULTS < _config.yml < override
-      config = Utils.deep_merge_hashes(config, override).stringify_keys
-      set_timezone(config['timezone']) if config['timezone']
+      config = Utility.deep_merge_hashes(config, override).stringify_keys
 
       config
     end
@@ -82,7 +82,4 @@ module DaoDao
       @logger = LogAdapter.new(writer)
     end
   end
-
-  require_all 'daodao/crawler'
-  require_all 'daodao/indexer'
 end

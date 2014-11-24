@@ -1,0 +1,53 @@
+#!/usr/bin/env ruby
+require 'active_support/inflector'
+t = Time.now
+timetag = t.strftime '%Y%m%d%H%M%S'
+
+
+if ARGV.length == 0
+  abort 'please specify the model name'
+end
+
+tablename = ARGV[0]
+tablename = tablename.pluralize
+modelname = tablename.singularize
+
+ARGV.shift
+
+body = ''
+ARGV.each do |arg|
+  fieldname = arg.split(':')[0]
+  type = arg.split(':')[1]
+  type = (type == nil) ? 'string' : type
+
+  body << "    t.#{type} :#{fieldname}\n"
+end
+
+tabletpl = "
+class Create#{tablename.capitalize} < ActiveRecord::Migration
+  def change
+    create_table :datacenters do |t|
+#{body}
+      t.timestamps
+    end
+  end
+end
+"
+
+# write migration file
+migratefname = "db/migrate/#{timetag}_create_#{tablename}.rb"
+
+f = open(migratefname, 'w')
+f.write tabletpl
+f.close
+
+# write model file
+modelfname = "lib/daodao/models/#{modelname}.rb"
+modeltpl = "
+class #{modelname.classify} < ActiveRecord::Base
+end
+"
+
+f = open(modelfname, 'w')
+f.write modeltpl
+f.close
