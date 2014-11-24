@@ -6,10 +6,10 @@
 #
 
 adapter: mysql2
-database: crawldata
+database: development
 pool: 20
-host: localhost
-username: root
-password: password
+host: 106.186.20.240
+username: development
+password: development
 timeout: 60000
 
