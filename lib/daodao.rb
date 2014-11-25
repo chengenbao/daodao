@@ -29,6 +29,13 @@ module DaoDao
   autoload :Configuration,         'daodao/configuration'
   autoload :Errors,                'daodao/errors'
   autoload :HttpRequester,         'daodao/utils/http_requester'
+  autoload :City,                  'daodao/city'
+  autoload :Hotel,                 'daodao/hotel'
+  autoload :Room,                  'daodao/room'
+
+  # crawler and indexer
+  require 'daodao/crawler'
+  require 'daodao/indexer'
 
   class << self
     def env
@@ -56,5 +63,26 @@ module DaoDao
 
       config
     end
+
+    # Public: Fetch the logger instance.
+    #
+    # Returns the LogAdapter instance.
+    def logger
+      @logger ||= LogAdapter.new(Stevenson.new, (ENV["DAODAO_LOG_LEVEL"] || :info).to_sym)
+    end
+
+    # Public: Set the log writer.
+    #         New log writer must respond to the same methods
+    #         as Ruby's interal Logger.
+    #
+    # writer - the new Logger-compatible log transport
+    #
+    # Returns the new logger.
+    def logger=(writer)
+      @logger = LogAdapter.new(writer)
+    end
   end
+
+  require_all 'daodao/crawler'
+  require_all 'daodao/indexer'
 end
