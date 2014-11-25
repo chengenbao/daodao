@@ -1,27 +1,31 @@
 #!/usr/bin/env ruby
 
-filename = File.dirname(__FILE__) + "/../config/application.rb"
-require "#{File.expand_path(filename)}"
 
 page = ''
-f = open('data/page.html')
-
+f = open('data/hotel_page.html')
 while line = f.gets
   page << line
 end
-
 f.close
 
-
-reg = /<a target="_blank" class="property_title" href="(.+\.html)" onclick="setPID\(\d+\);" title="[^<>]+">\s+<span itemprop="name">([^<>]+)<\/span>\s+<\/a>/
+reg = /all_single_meta_reqs = JSON.decode\('([^;]+)'\);/
 match = page.scan reg
+tmp = match[0][ 0]
 
-hotels = {}
-
-match.each do |item|
-  url = item[0]
-  name = item[1]
-  hotels[name] = url
+all_single_meta_reqs = []
+tmp = tmp[1, tmp.length - 2]
+bindex = 0
+while eindex = tmp.index('{"hotel_id', bindex + 1)
+  item = tmp[bindex, eindex - bindex - 1]
+  all_single_meta_reqs << item
+  bindex = eindex
 end
 
-puts hotels.length
+if bindex < tmp.length
+  all_single_meta_reqs << tmp[bindex, tmp.length - bindex]
+end
+
+all_single_meta_reqs.each do |single_meta_reqs|
+  puts single_meta_reqs
+end
+

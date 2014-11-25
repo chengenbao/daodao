@@ -1,43 +1,38 @@
 #!/usr/bin/env ruby
 
 
-filename = File.dirname(__FILE__) + "/../config/application.rb"
+filename = File.dirname(__FILE__) + "/../lib/daodao/utils/http_requester"
 require "#{File.expand_path(filename)}"
 require 'yaml'
 require 'json'
 require 'uri'
 
 requester = Util::HttpRequester.new
-hotels_map = YAML.load(File.open('data/beijing-hotels.yaml'))
-map = {}
-hotels_map.each do |k, v|
-  s = k.unpack('H*')[0]
-  map[s] = v
-end
 
-name = ARGV[0].unpack('H*')[0]
-url = map[name]
-url = "http://www.daodao.com#{url}"
+url = "http://www.daodao.com/Hotel_Review-g294212-d3198755-Reviews-The_HuLu_Hotel-Beijing.html"
 
-#page = requester.get url, nil
-
-#// read page data
-page = ''
-f = open('data/hotel_page.html')
-while line = f.gets
-  page << line
-end
+page = requester.get url, nil
 
 reg = /all_single_meta_reqs = JSON.decode\('([^;]+)'\);/
 match = page.scan reg
-all_single_meta_reqs = match[0][ 0]
+tmp = match[0][ 0]
 
-all_single_meta_reqs = JSON.parse(all_single_meta_reqs)
+all_single_meta_reqs = []
+tmp = tmp[1, tmp.length - 2]
+bindex = 0
+while eindex = tmp.index('{"hotel_id', bindex + 1)
+  item = tmp[bindex, eindex - bindex - 1]
+  puts item
+  all_single_meta_reqs << item
+  bindex = eindex
+end
 
+if bindex < tmp.length
+  all_single_meta_reqs << tmp[bindex, tmp.length - bindex]
+end
 all_single_meta_reqs.each do |single_mata_req|
-  data = single_mata_req.to_json
   field = {}
-  field['single_hotel_meta_req'] = data
+  field['single_hotel_meta_req'] = single_mata_req
 
   url = 'http://www.daodao.com/DaoDaoCheckRatesAjax?action=getSingleHotelMeta'
   page = requester.get url, field
